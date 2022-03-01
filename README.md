@@ -2,7 +2,7 @@
 CheatSheet 
 
 
-x/s &Sample # prints        ; the whole string with escaping
+x/s &Sample                 ; prints the whole string with escaping
 
 printf "%s\n", 0x601065     ; prints the whole string without escaping
 
