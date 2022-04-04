@@ -1,5 +1,5 @@
 # GDB
-CheatSheet 
+## CheatSheet 
 
 
 x/s &Sample                 ; prints the whole string with escaping
