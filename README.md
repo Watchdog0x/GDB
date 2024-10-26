@@ -45,6 +45,8 @@ clear function              # Clear breaks at function
 
 ## Memory Examination (x command)
 ```bash
+x/units|format|size addr
+
 # Format Letters:
 x/o - octal
 x/x - hexadecimal
