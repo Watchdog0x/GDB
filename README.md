@@ -192,11 +192,46 @@ print $i             # Print variable
 ```
 
 
-## CheatSheet 
+# X86 Assembly Control Flow Cheat Sheet
+
+## Conditional Jump Instructions
+| Instruction | Description | Condition Flags |
+|-------------|-------------|-----------------|
+| je  | Jump if equal | ZF=1 |
+| jne | Jump if not equal | ZF=0 |
+| jg  | Jump if greater | ZF=0 and SF=OF |
+| jl  | Jump if less | SF≠OF |
+| jle | Jump if less than or equal | ZF=1 or SF≠OF |
+| jge | Jump if greater than or equal | SF=OF |
+| ja  | Jump if above (unsigned) | CF=0 and ZF=0 |
+| jb  | Jump if below (unsigned) | CF=1 |
+| jae | Jump if above or equal (unsigned) | CF=0 |
+| jbe | Jump if below or equal (unsigned) | CF=1 or ZF=1 |
+| js  | Jump if signed | SF=1 |
+| jns | Jump if not signed | SF=0 |
+| jo  | Jump if overflow | OF=1 |
+| jno | Jump if not overflow | OF=0 |
+| jz  | Jump if zero | ZF=1 |
+| jnz | Jump if not zero | ZF=0 |
+
+## Important Flags
+- **Carry Flag (CF)**: Set when 65th bit is 1
+- **Zero Flag (ZF)**: Set when result is 0
+- **Overflow Flag (OF)**: Set when result wraps between positive/negative
+- **Sign Flag (SF)**: Set when result is negative (signed bit set)
+
+## Flag Updates
+Flags are modified by:
+1. Most arithmetic instructions
+2. `cmp` instruction (like `sub` but discards result)
+3. `test` instruction (like `and` but discards result)
 
 
+
+```bash
 x/s &Sample                 ; prints the whole string with escaping
 
 printf "%s\n", 0x601065     ; prints the whole string without escaping
 
 set {type}40050a=0x20       ; Chnage the value of bit (type can be int, char ....)
+```
