@@ -284,6 +284,9 @@ printf "%s\n", 0x401234  # Print string without escaping
 set {int}0x401234=0x90   # Write int to address
 set {char}0x401234=0x90  # Write byte to address
 set *0x401234=0x90       # Write word to address
+
+# Register Modification
+set $eax = 123          # Set eax to 123
 ```
 
 ## X86 Assembly Control Flow
