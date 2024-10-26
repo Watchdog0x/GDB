@@ -106,6 +106,30 @@ undisplay 1               # Remove display #1
 info display              # Show all displays
 ```
 
+## GDB Essential Display Commands
+```bash
+# Common Display Commands
+display/i $rip              # Display current instruction
+display/5i $rip            # Display next 5 instructions
+display/x $rax             # Display rax in hex
+display/s $rsi             # Display string pointer in rsi
+display/wx $rsp            # Display word at stack pointer
+display/2wx $rsp           # Display two words at stack pointer
+
+# Useful Combinations
+display/i $rip             # Current instruction
+display/x $rsp             # Stack pointer in hex
+display/x $rbp             # Base pointer in hex
+display/10i $rip           # Next 10 instructions
+display/8xg $rsp          # 8 quadwords from stack
+
+# Remove Displays
+undisplay                  # Remove all displays
+undisplay 1               # Remove display #1
+disable display 1         # Temporarily disable display #1
+enable display 1          # Re-enable display #1
+```
+
 ## Register Commands
 ```bash
 info registers            # Show all registers
@@ -220,6 +244,17 @@ print $i             # Print variable
 - **Overflow Flag (OF)**: Set when result wraps between positive/negative
 - **Sign Flag (SF)**: Set when result is negative (signed bit set)
 
+### Flag Register Quick Reference
+```
+RFLAGS Register Bits:
+CF (0)  - Carry Flag
+PF (2)  - Parity Flag
+AF (4)  - Auxiliary Flag
+ZF (6)  - Zero Flag
+SF (7)  - Sign Flag
+OF (11) - Overflow Flag
+```
+
 ## Flag Updates
 Flags are modified by:
 1. Most arithmetic instructions
@@ -228,10 +263,101 @@ Flags are modified by:
 
 
 
+# Ultimate PWN Cheat Sheet
+
+## Advanced Memory Examination
 ```bash
-x/s &Sample                 ; prints the whole string with escaping
+# Memory Examination Patterns
+x/10i $rip                # View next 10 instructions
+x/10xg $rsp               # View 10 quad-words on stack
+x/s $rdi                  # View string at rdi
+x/wx $rbp-0x8            # View word at frame pointer - 8
+x/16xb $rip              # View 16 bytes of machine code
 
-printf "%s\n", 0x601065     ; prints the whole string without escaping
+# String Operations
+x/s &variable            # Print string at variable address
+x/s 0x401234            # Print string at address
+printf "%s\n", 0x401234  # Print string without escaping
 
-set {type}40050a=0x20       ; Chnage the value of bit (type can be int, char ....)
+# Memory Modification
+set {int}0x401234=0x90   # Write int to address
+set {char}0x401234=0x90  # Write byte to address
+set *0x401234=0x90       # Write word to address
 ```
+
+## X86 Assembly Control Flow
+### Conditional Jumps and Flags
+```nasm
+# Common Compare Patterns
+cmp rax, rbx            # Compare rax and rbx
+test rax, rax           # Test if rax is zero
+and rax, rbx            # Logical AND
+sub rax, rbx            # Subtract and set flags
+
+# Flag Testing
+je  label              # Jump if equal (ZF=1)
+jne label              # Jump if not equal (ZF=0)
+jg  label              # Jump if greater (signed)
+jl  label              # Jump if less (signed)
+ja  label              # Jump if above (unsigned)
+jb  label              # Jump if below (unsigned)
+```
+
+## Common GDB Patterns for PWN
+```bash
+# Pattern Creation and Search
+pattern create 100              # Create cyclic pattern
+pattern search 0x61616161       # Search for offset
+
+# Memory Operations
+vmmap                          # Show memory mappings
+find 0x7fff00000000,+2000,0x41414141  # Search memory range
+telescope 0x401234 20          # View memory as different formats
+
+# Breakpoint Patterns
+break *0x401234               # Break at address
+break *main+51                # Break at offset
+break *main                   # Break at main start
+commands 1                    # Commands to run at breakpoint 1
+    silent
+    x/i $rip
+    continue
+end
+
+# Process Information
+info proc mappings            # Memory layout
+info registers               # All registers
+info frame                   # Stack frame info
+```
+
+## One-liners and Tricks
+```bash
+# Quick Debug Commands
+run < <(python -c 'print "A"*100')  # Run with python input
+run < <(cyclic 100)                # Run with cyclic pattern
+set follow-fork-mode child        # Follow child process
+set disassembly-flavor intel     # Use intel syntax
+
+# Memory Manipulation
+set {int}($rbp-0x8)=0x41414141   # Write to stack variable
+generate-core-file               # Create core dump
+```
+
+## Tips for PWN
+1. Always check ASLR: `cat /proc/sys/kernel/randomize_va_space`
+2. Useful environment control:
+   ```bash
+   unset LINES COLUMNS          # For clean core dumps
+   set env LD_PRELOAD          # Remove LD_PRELOAD
+   ```
+3. Common breakpoint locations:
+   - `main+0`
+   - `*puts@plt`
+   - `*system@plt`
+   - Stack return addresses
+
+4. Quick memory protections check:
+   ```bash
+   checksec --file=binary      # Check binary protections
+   readelf -l binary          # Check segment permissions
+   ```
