@@ -362,3 +362,120 @@ generate-core-file               # Create core dump
    checksec --file=binary      # Check binary protections
    readelf -l binary          # Check segment permissions
    ```
+
+## GDB Configuration Files
+```bash
+# GDB Init File Locations (in order of priority)
+~/.gdbinit                     # User's home directory
+./.gdbinit                     # Current working directory
+```
+
+### Basic ~/.gdbinit Configuration
+```bash
+# Common Settings
+set disassembly-flavor intel   # Set Intel syntax
+set pagination off             # Disable paging
+set follow-fork-mode child     # Follow child after fork
+set follow-exec-mode new       # Keep running after exec
+
+# Python PATH for PEDA/GEF/pwndbg
+source ~/peda/peda.py         # For PEDA
+source ~/pwndbg/gdbinit.py    # For pwndbg
+source ~/gef/gef.py           # For GEF
+
+# Common aliases
+define hook-run
+    unset env LINES
+    unset env COLUMNS
+end
+
+# Pretty Printing
+set print pretty on           # Pretty print structures
+set print array on           # Pretty print arrays
+set print array-indexes on   # Show array indexes
+
+# History
+set history save on          # Save command history
+set history size 32768       # Bigger history
+set history filename ~/.gdb_history  # History file location
+
+# Other useful settings
+set confirm off              # Disable confirmations
+set verbose off              # Less verbose output
+set height 0                 # No limit on terminal height
+set width 0                 # No limit on terminal width
+```
+
+### Advanced ~/.gdbinit Settings
+```bash
+# Custom prompt
+set prompt \001\033[1;32m\002gdb> \001\033[0m\002
+
+# Custom functions
+define pwn
+    # Your custom initialization for pwn
+    break main
+    run
+end
+
+# Load symbols for stripped binaries
+set auto-load safe-path /
+
+# Debug child processes
+catch fork
+catch exec
+
+# For better exploit development
+set context-size 16          # Lines of code to show
+set disassemble-next-line on # Auto disassemble next line
+```
+
+### Installation Commands for Popular GDB Extensions
+```bash
+# pwndbg
+git clone https://github.com/pwndbg/pwndbg
+cd pwndbg
+./setup.sh
+
+# PEDA
+git clone https://github.com/longld/peda.git ~/peda
+echo "source ~/peda/peda.py" >> ~/.gdbinit
+
+# GEF
+wget -O ~/.gdbinit-gef.py -q https://gef.blah.cat/py
+echo source ~/.gdbinit-gef.py >> ~/.gdbinit
+
+# Change between different GDB enhancers
+# Make sure only one is sourced in ~/.gdbinit
+```
+
+### Managing Multiple GDB Configurations
+```bash
+# Create separate configuration files
+~/.gdbinit-peda
+~/.gdbinit-pwndbg
+~/.gdbinit-gef
+
+# Switch between them using aliases in ~/.bashrc
+alias peda-gdb='gdb -x ~/.gdbinit-peda'
+alias pwndbg-gdb='gdb -x ~/.gdbinit-pwndbg'
+alias gef-gdb='gdb -x ~/.gdbinit-gef'
+```
+
+### Project-Specific GDB Configuration
+```bash
+# In your project directory's .gdbinit
+set directories /path/to/source
+set substitute-path /old/path /new/path
+set sysroot /path/to/sysroot
+
+# Auto-load project settings
+add-auto-load-safe-path /path/to/project
+
+# Custom commands for this project
+define project-specific
+    break main
+    set args test input
+    run
+end
+```
