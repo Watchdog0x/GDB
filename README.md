@@ -334,17 +334,65 @@ info registers               # All registers
 info frame                   # Stack frame info
 ```
 
-## One-liners and Tricks
-```bash
-# Quick Debug Commands
-run < <(python -c 'print "A"*100')  # Run with python input
-run < <(cyclic 100)                # Run with cyclic pattern
-set follow-fork-mode child        # Follow child process
-set disassembly-flavor intel     # Use intel syntax
 
-# Memory Manipulation
-set {int}($rbp-0x8)=0x41414141   # Write to stack variable
-generate-core-file               # Create core dump
+
+## Basic Input Methods
+```bash
+echo "input" | ./program                    # Pipe input
+./program <<< "input"                       # Here string
+cat input.txt | ./program                   # Pipe from file
+
+# Python One-Liners
+python -c "print('A'*50)" | ./program       # Basic buffer overflow
+python -c "print('A'*40 + '\xef\xbe\xad\xde')" | ./program  # With address
+python3 -c "import sys; sys.stdout.buffer.write(b'A'*50)" | ./program  # Python3 binary
+
+# Format String
+python -c "print('%x '*10)" | ./program     # Format string leak
+python -c "print('AAAA' + '%x '*10)" | ./program  # Format with offset
+
+# Complex Payloads
+(python -c "print('A'*50)"; cat) | ./program  # Keep stdin open
+(echo -ne "\x41\x41\x41\x41"; cat) | ./program  # Binary input with stdin
+
+# Cyclic Patterns
+cyclic 100 | ./program                      # Create pattern
+cyclic -l 0x6161616a                       # Find offset in pattern
+
+# Using Files
+echo -ne "\x41\x41\x41\x41" > input.txt    # Create binary file
+./program < input.txt                       # Input from file
+
+# Environment Variables
+SHELL=/bin/bash ./program                   # Set env variable
+env -i ./program                            # Clean environment
+
+# GDB Input Methods
+r < <(python -c "print('A'*50)")           # Run with python input
+r < <(echo -ne "\x41\x41\x41\x41")        # Run with binary input
+
+# Special Characters
+echo -ne "\x00\x0a\x0d" | ./program        # Null, newline, carriage return
+python -c "print(''.join([chr(x) for x in range(256)]))" | ./program  # All bytes
+
+# Input with Timing
+(sleep 1; echo "input") | ./program         # Delayed input
+
+# Handle Multiple Inputs
+(echo "input1"; sleep 1; echo "input2") | ./program
+
+# Random Input Generation
+head -c 100 /dev/urandom | ./program       # Random bytes
+dd if=/dev/urandom bs=100 count=1 | ./program  # Alternative
+
+# Network Input (for network programs)
+echo -ne "GET / HTTP/1.0\r\n\r\n" | nc localhost 80
+
+# Shellcode Testing
+python -c "print('\x90'*50 + shellcode)" | ./program  # NOP sled
+
+# Debug with strace
+echo "input" | strace ./program            # Trace with input
 ```
 
 ## Tips for PWN
